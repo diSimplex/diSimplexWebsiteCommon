@@ -1,0 +1,5 @@
+#!/bin/bash
+
+# Start by copying the mjekyll scripts to the user's local bin directory.
+#
+cp mjekyll* $HOME/bin

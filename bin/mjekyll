@@ -1,0 +1,154 @@
+#!/usr/bin/env ruby
+
+# This re-implementation of the jekyll ruby script is designed to build 
+# and manage a multi-part jekyll website.  It assumes that the whole 
+# website is structured as multiple subWebsites managed as separate 
+# jekyll sites all linked by a single 'base' jekyll (sub)site which 
+# contains the default configuration and plugins.
+#
+# To do this we assume that all of the jekyll (sub)sites are in 
+# parallel directories and that the 'base' jekyll (sub)site is in a 
+# directory named 'base'.
+#
+# This version of the jekyll command adds the ability to:
+#
+# 1. load both the 'local' and 'base' _config.yml files,
+#
+# 2. load plugins from both 'local' and 'base' _plugins directories.
+#
+# 3. load data files from both 'local' and 'base' _data directories.
+#
+# 4. loads the octopress-3.0.0 commands into this jekyll command 
+# (deploy)
+#
+# This code has been adapted from the jekyll-2.5.3 gem
+#
+# NOTE: we do not make use of this hierarchical pattern for the 
+# _includes directories since we make use of the more efficient Nginx 
+# server side includes to include partial pages from multiple 
+# sub(sites). (In practice this means each of the _includes files are 
+# different across the various (sub)sites).
+
+STDOUT.sync = true
+
+$:.unshift File.join(File.dirname(__FILE__), *%w{ .. lib })
+
+require 'jekyll'
+require 'mercenary'
+require 'octopress'
+
+module Jekyll
+  class Configuration
+    #
+    # WRAP read_config_files (MONKEY PATCH)
+    # to ensure the base _config.yml file is loaded first
+    # 
+    alias_method :orig_read_config_files, :read_config_files
+    def read_config_files(files)
+      baseSourcePath = source({}).sub(/[^\/]+$/,'')+'base'
+      baseConfig = Jekyll.sanitized_path(baseSourcePath, "_config.yml")
+      files.unshift(baseConfig) if File.exists?(baseConfig)
+      orig_read_config_files(files)
+    end
+  end
+
+  class DataReader
+    #
+    # reimplement read_data_to
+    # to ensure we can access the base _data directories
+    #
+    def read_base_data_to(dir, data)
+      return unless File.directory?(dir) && !@entry_filter.symlink?(dir)
+
+      entries = Dir.chdir(dir) do
+        Dir["*.{yaml,yml,json,csv}"] + Dir["*"].select { |fn| File.directory?(fn) }
+      end
+
+      entries.each do |entry|
+        #path = @site.in_source_dir(dir, entry)
+        path = Jekyll.sanitized_path(dir, entry)
+        next if @entry_filter.symlink?(path)
+
+        key = sanitize_filename(File.basename(entry, ".*"))
+        if File.directory?(path)
+          read_base_data_to(path, data[key] = {})
+        else
+          data[key] = read_data_file(path)
+        end
+      end
+    end
+    #
+    # REPLACE read (MONKEY PATCH)
+    # to ensure the data in the base _data directory is loaded first
+    #
+    def read(dir)
+      baseSourcePath = site.source.sub(/[^\/]+$/,'')+'base/'+dir
+      Dir.chdir(baseSourcePath) do
+        read_base_data_to(baseSourcePath, @content)
+      end
+      localData = site.in_source_dir(dir)
+      read_data_to(localData, @content)
+      @content
+    end
+  end
+end
+
+# From Octopress (note used by jekyll)
+#if ENV['BUNDLE_BIN_PATH'] || ENV['BUNDLE_GEMFILE']
+#  begin
+#    require 'bundler'
+#    Bundler.require(:octopress)
+#  rescue
+#  end
+#end
+
+#%w[jekyll-import].each do |blessed_gem|
+#  begin
+#    require blessed_gem
+#  rescue LoadError
+#  end
+#end
+
+# Pre-load _plugins 
+# Alas this is NOT a general solution... but it works for me since I DO 
+# NOT change the location of the _plugins from the default.
+#
+%w[../common/plugins ../base/_plugins _plugins].each do |plugins|
+  Dir.chdir(plugins) do 
+    $LOAD_PATH << Dir.pwd
+    Dir[File.join("**", "*.rb")].sort.each do |f|
+      require f
+    end
+  end
+end
+
+#Jekyll::PluginManager.require_from_bundler
+
+Jekyll::Deprecator.process(ARGV)
+
+Mercenary.program(:jekyll) do |p|
+  p.version Jekyll::VERSION + "-mJekyll"
+  p.description 'mJekyll/Octopress is a blog-aware, static site generator in Ruby'
+  p.syntax 'mjekyll <subcommand> [options]'
+
+  p.option 'source', '-s', '--source [DIR]', 'Source directory (defaults to ./)'
+  p.option 'destination', '-d', '--destination [DIR]', 'Destination directory (defaults to ./_site)'
+  p.option 'safe', '--safe', 'Safe mode (defaults to false)'
+  p.option 'plugins', '-p', '--plugins PLUGINS_DIR1[,PLUGINS_DIR2[,...]]', Array, 'Plugins directory (defaults to ./_plugins)'
+  p.option 'layouts', '--layouts DIR', String, 'Layouts directory (defaults to ./_layouts)'
+
+  Jekyll::Command.subclasses.each { |c| c.init_with_program(p) }
+  Octopress::Command.subclasses.each { |c| c.init_with_program(p) }
+
+  p.action do |args, options|
+    if args.empty?
+      puts p
+    else
+      unless p.has_command?(args.first)
+        Jekyll.logger.abort_with "Invalid command. Use --help for more information"
+      end
+    end
+  end
+end
+
+

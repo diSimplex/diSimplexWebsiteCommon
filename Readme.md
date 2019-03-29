@@ -1,7 +1,13 @@
 # diSimplex expositional websites common project
 
-This project contains all of the stuff that might be common to one or 
-more of the diSimplex expositional websites.
+This project contains all of the stuff that might be common to one or more 
+of the diSimplex expositional sub-websites.
+
+In particular we use a version of Jekyll modified to build a single website 
+out of **multiple** sub-websites. See [bin/Readme.md](bin/Readme.md).
+
+The plugins directory contains all of the Jekyll plugins which are common 
+to all of the sub-websites. See [plugins/Readme.md](plugins/Readme.md).
 
 # Licences and Prior Art
 
