@@ -21,7 +21,7 @@ singly or collectively to the whole of any diSimplex website project.
 Unless explicitly noted otherwise, the contents of this diSimplex website 
 project which are not code are
 
-  Copyright 2019 PerceptiSys Ltd (Stephen Gaito).
+    Copyright 2019 PerceptiSys Ltd (Stephen Gaito).
 
 This work is licensed under a Creative Commons Attribution-ShareAlike 4.0 
 International License. You may obtain a copy of the License at
@@ -40,7 +40,7 @@ permissions and limitations under the License.
 
 Unless explicitly noted otherwise, all code is
 
-   Copyright 2019 PerceptiSys Ltd (Stephen Gaito)
+    Copyright 2019 PerceptiSys Ltd (Stephen Gaito)
 
 and is licensed under the Apache License, Version 2.0 (the "License");
 you may not use this code except in compliance with the License.

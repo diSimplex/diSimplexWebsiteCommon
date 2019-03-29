@@ -23,5 +23,5 @@ singly or collectively to the whole of any diSimplex website project.
 
 For details see the attached
 
-   [Licenses and Prior Art](LicensesAndPriorArt.html)
+   [Licenses and Prior Art](LicensesAndPriorArt.md)
 
