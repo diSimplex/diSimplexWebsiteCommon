@@ -60,3 +60,9 @@ Any and all new patentable ideas contained in a diSimplex website project,
 either the exposition, discussion or code, are meant to document Prior Art 
 from the time they are commited in a publicly accessible version control 
 archive (such as but not restricted to GitHub).
+
+## External work
+
+Some code from [Octopress](https://github.com/octopress/octopress) version 
+3.0.11 has been incorperated into various plugins using Ocotpress' MIT 
+License.

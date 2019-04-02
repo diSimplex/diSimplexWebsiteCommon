@@ -26,10 +26,105 @@ end
 module Octopress
 
   # The following has been modified from 
+  # octopress-3.0.11/lib/octopress/command.rb
+  #
+  class Command
+    def self.inherited(base)
+      subclasses << base
+    end
+
+    def self.subclasses
+      @subclasses ||= []
+    end
+
+    def init_with_program(p)
+      raise NotImplementedError.new("")
+    end
+  end
+
+
+  # The following has been modified from 
+  # octopress-3.0.11/lib/octopress/command.rb
+  #
+  class New < Command
+    def self.init_with_program(p)
+      p.command(:new) do |c|
+        c.syntax 'new <PATH>'
+        c.description 'Creates a new site with Jekyll and Octopress scaffolding at the specified path.'
+        c.option 'force', '-f', '--force', 'Force creation even if path already exists.'
+        c.option 'blank', '-b', '--blank', 'Creates scaffolding but with empty files.'
+        
+        c.action do |args, options|
+          if args.empty?
+            c.logger.error "You must specify a path."
+            puts c
+          else
+            Jekyll::Commands::New.process(args, options)
+            Octopress::Scaffold.new(args, options).write
+          end
+        end
+
+        c.command(:page) do |c|
+          c.syntax 'page <PATH> [options]'
+          c.description 'Add a new page to your Jekyll site.'
+          c.option 'title', '-t', '--title TITLE', 'String to be added as the title in the YAML front-matter.'
+          CommandHelpers.add_page_options c
+          CommandHelpers.add_common_options c
+
+          c.action do |args, options|
+            if args.empty?
+              c.logger.error "Plese pass a path for your new page."
+              puts c
+            else
+              options['path'] = args.first
+              Page.new(Octopress.site(options), options).write
+            end
+          end
+        end
+
+        c.command(:post) do |c|
+          c.syntax 'post <TITLE> [options]'
+          c.description 'Add a new post to your Jekyll site.'
+          CommandHelpers.add_page_options c
+          c.option 'slug', '-s', '--slug SLUG', 'Use this slug in filename instead of sluggified post title.'
+          c.option 'dir', '-D', '--dir DIR', 'Create post at _posts/DIR/.'
+          CommandHelpers.add_common_options c
+
+          c.action do |args, options|
+            if args.empty?
+              c.logger.error "Please pass a title for your new post."
+              puts c
+            else
+              options['title'] = args.join(" ")
+              Post.new(Octopress.site(options), options).write
+            end
+          end
+        end
+        c.command(:draft) do |c|
+          c.syntax 'draft <TITLE> [options]'
+          c.description 'Add a new draft post to your Jekyll site.'
+          CommandHelpers.add_page_options c
+          c.option 'slug', '-s', '--slug SLUG', 'Use this slug in filename instead of sluggified post title.'
+          CommandHelpers.add_common_options c
+
+          c.action do |args, options|
+            if args.empty?
+              c.logger.error "Plese pass a title for your new draft."
+              puts c
+            else
+              options['title'] = args.join(" ")
+              Draft.new(Octopress.site(options), options).write
+            end
+          end
+        end
+      end
+    end
+  end
+
+  # The following has been modified from 
   # octopress-deploy-1.3.0/lib/octopress-deploy/rsync.rb
   #
   module Deploy
-
     def push(options)
       deployOpts =
         YAML.load_file(options['config_file']) if options.has_key?('config_file')
@@ -124,26 +219,26 @@ module Octopress
   # The following has been adapted from
   # octopress-3.0.0.rc.31/lib/octopress/commands/new.rb
   # 
-  class Create < Command
-    def self.init_with_program(p)
-      p.command(:create) do |c|
-        c.syntax 'create <PATH>'
-        c.description 'Creates a new site with Jekyll and Octopress scaffolding at the specified path.'
-        c.option 'force', '-f', '--force', 'Force creation even if path already exists.'
-        c.option 'blank', '-b', '--blank', 'Creates scaffolding but with empty files.'
-        
-        c.action do |args, options|
-          if args.empty?
-            c.logger.error "You must specify a path."
-            puts c
-          else
-            Jekyll::Commands::New.process(args, options)
-            Octopress::Scaffold.new(args, options).write
-          end
-        end
-      end
-    end
-  end
+#  class Create < Command
+#    def self.init_with_program(p)
+#      p.command(:create) do |c|
+#        c.syntax 'create <PATH>'
+#        c.description 'Creates a new site with Jekyll and Octopress scaffolding at the specified path.'
+#        c.option 'force', '-f', '--force', 'Force creation even if path already exists.'
+#        c.option 'blank', '-b', '--blank', 'Creates scaffolding but with empty files.'
+#        
+#        c.action do |args, options|
+#          if args.empty?
+#            c.logger.error "You must specify a path."
+#            puts c
+#          else
+#            Jekyll::Commands::New.process(args, options)
+#            Octopress::Scaffold.new(args, options).write
+#          end
+#        end
+#      end
+#    end
+#  end
 
   New.class_eval do
     def self.init_with_program(p)
@@ -267,6 +362,7 @@ module Octopress
   end
 
   class DeployCommand < Command
+    extend Octopress::Deploy
     def self.init_with_program(p)
       p.command(:deploy) do |c|
         c.syntax 'deploy'
@@ -274,13 +370,14 @@ module Octopress
         c.action do | args, options |
           options['config_file'] = '_deploy.yml' unless options.has_key?(:config_file)
           options['site_dir']    = '_site' unless options.has_key?(:site_dir)
-          Octopress::Deploy.push(options)
+          push(options)
         end
       end
     end
   end
 
   class StageCommand < Command
+    extend Octopress::Deploy
     def self.init_with_program(p)
       p.command(:stage) do |c|
         c.syntax 'stage'
@@ -288,7 +385,7 @@ module Octopress
         c.action do | args, options |
           options['config_file'] = '_stage.yml' unless options.has_key?(:config_file)
           options['site_dir']    = '_site' unless options.has_key?(:site_dir)
-          Octopress::Deploy.push(options)
+          push(options)
         end
       end
     end
@@ -344,7 +441,9 @@ module Octopress
           puts ""
           system('rm -rf xapian')
           puts "Recreating Xapian"
-          setupXapian(Octopress.site)
+          siteOpts = Jekyll.configuration(options)
+          site = Jekyll::Site.new(siteOpts)
+          setupXapian(site)
           setupIndexer
           recursivelyWalkDir(".", XAPIAN_LAST_REINDEX) do | someJekyllData |
             someJekyllData[:url] =
