@@ -25,6 +25,65 @@ end
 
 module Octopress
 
+  # The following has been modified from 
+  # octopress-deploy-1.3.0/lib/octopress-deploy/rsync.rb
+  #
+  module Deploy
+
+    def push(options)
+      deployOpts =
+        YAML.load_file(options['config_file']) if options.has_key?('config_file')
+      options = options.merge(deployOpts)
+
+      localDir   = options['site_dir']
+      remotePath = options['remote_path']
+
+      if not File.exist?(localDir)
+        abort "Cannot find site build at #{localDir}. Be sure to build your site first."
+      end
+
+      puts "Syncing #{localDir} files to #{remotePath} with rsync."
+
+      flags    = options['flags']    || ' -avz'
+      delete   = options['delete']   || false
+      exclude  = options['exclude']  || Array.new
+      include  = options['include']  || Array.new
+      localDir = options['site_dir'] || '_site'
+
+      cmd =  "rsync "
+
+      cmd << "#{flags} "
+
+      cmd << " --exclude-from #{options[:exclude_from]}" if
+        options.has_key?('exclude_from')
+
+      exclude.each do |e|
+        cmd << " --exclude #{e}"
+      end
+
+      cmd << " --include-from #{options[:include_from]}" if
+        options.has_key?('include_from')
+
+      include.each do |i|
+        cmd << " --include #{i}"
+      end
+
+      cmd << " --rsh='ssh -p#{@port}'" if
+        options.has_key?('user') && options.has_key?('port')
+
+      cmd << " --delete " if delete
+
+      cmd << " #{localDir}/* "
+
+      cmd << " #{options['user']}:" if options.has_key?('user')
+
+      cmd << "#{remotePath}"
+
+      puts "\nusing [#{cmd}]\n\n"
+      system(cmd)
+    end # push
+  end # Deploy
+
   # The following has been taken from 
   # octopress-3.0.0.rc.31/lib/octopress/command.rb
   #
@@ -207,14 +266,28 @@ module Octopress
     end
   end
 
+  class DeployCommand < Command
+    def self.init_with_program(p)
+      p.command(:deploy) do |c|
+        c.syntax 'deploy'
+        c.description 'Deploy your Jekyll site.'
+        c.action do | args, options |
+          options['config_file'] = '_deploy.yml' unless options.has_key?(:config_file)
+          options['site_dir']    = '_site' unless options.has_key?(:site_dir)
+          Octopress::Deploy.push(options)
+        end
+      end
+    end
+  end
+
   class StageCommand < Command
     def self.init_with_program(p)
       p.command(:stage) do |c|
         c.syntax 'stage'
-        c.description 'Stage your Octopress site.'
+        c.description 'Stage your Jekyll site.'
         c.action do | args, options |
-          options[:config_file] = '_stage.yml' unless options.has_key?(:config_file)
-          options[:site_dir]    = '_site' unless options.has_key?(:site_dir)
+          options['config_file'] = '_stage.yml' unless options.has_key?(:config_file)
+          options['site_dir']    = '_site' unless options.has_key?(:site_dir)
           Octopress::Deploy.push(options)
         end
       end
