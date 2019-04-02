@@ -35,7 +35,6 @@ $:.unshift File.join(File.dirname(__FILE__), *%w{ .. lib })
 
 require 'jekyll'
 require 'mercenary'
-require 'octopress'
 
 module Jekyll
   class Configuration
