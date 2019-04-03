@@ -63,6 +63,12 @@ archive (such as but not restricted to GitHub).
 
 ## External work
 
-Some code from [Octopress](https://github.com/octopress/octopress) version 
-3.0.11 has been incorperated into various plugins using Ocotpress' MIT 
-License.
+Some code from [Octopress](https://github.com/octopress/octopress) 
+version 3.0.11 has been incorporated into various plugins using 
+[Ocotpress' MIT 
+License](https://github.com/octopress/octopress/blob/master/LICENSE).
+
+Some code from [Jekyll](https://github.com/jekyll/jekyll) version 
+2.x/3.x has been incorporated into the cachedBuilder plugins (among 
+others) using [Jekyll's MIT 
+License](https://github.com/jekyll/jekyll/blob/master/LICENSE).
