@@ -31,10 +31,14 @@
 
 STDOUT.sync = true
 
-$:.unshift File.join(File.dirname(__FILE__), *%w{ .. lib })
+#$LOAD_PATH.unshift File.join(File.dirname(__FILE__), *%w{ .. lib })
+$LOAD_PATH.unshift File.join(*%w{ .. common plugins })
+$LOAD_PATH.unshift File.join(*%w{ .. base _plugins })
+$LOAD_PATH.unshift File.join(*%w{ _plugins })
 
 require 'jekyll'
 require 'mercenary'
+require 'mjekyllCommands'
 
 module Jekyll
   class Configuration
@@ -92,15 +96,6 @@ module Jekyll
   end
 end
 
-# From Octopress (note used by jekyll)
-#if ENV['BUNDLE_BIN_PATH'] || ENV['BUNDLE_GEMFILE']
-#  begin
-#    require 'bundler'
-#    Bundler.require(:octopress)
-#  rescue
-#  end
-#end
-
 #%w[jekyll-import].each do |blessed_gem|
 #  begin
 #    require blessed_gem
@@ -112,14 +107,14 @@ end
 # Alas this is NOT a general solution... but it works for me since I DO 
 # NOT change the location of the _plugins from the default.
 #
-%w[../common/plugins ../base/_plugins _plugins].each do |plugins|
-  Dir.chdir(plugins) do 
-    $LOAD_PATH << Dir.pwd
-    Dir[File.join("**", "*.rb")].sort.each do |f|
-      require f
-    end
-  end
-end
+#%w[../common/plugins ../base/_plugins _plugins].each do |plugins|
+#  Dir.chdir(plugins) do 
+#    $LOAD_PATH << Dir.pwd
+#    Dir[File.join("**", "*.rb")].sort.each do |f|
+#      require f
+#    end
+#  end
+#end
 
 #Jekyll::PluginManager.require_from_bundler
 
