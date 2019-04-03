@@ -287,32 +287,6 @@ module Octopress
     end
   end
 
-# We implement the new post command in the blog subsite using OUR rules
-#
-#  class NewPost < NewCommand
-#    def self.init_with_command(c)
-#      puts "Initializing using NEW new post command"
-#      c.command(:post) do |c|
-#        c.syntax 'post <TITLE> [options]'
-#        c.description 'Add a new post to your Jekyll site.'
-#        NewCommand.add_page_options c
-#        c.option 'slug', '-s', '--slug SLUG', 'Use this slug in filename instead of sluggified post title.'
-#        c.option 'dir', '-d', '--dir DIR', 'Create post at _posts/DIR/.'
-#        NewCommand.add_common_options c
-#
-#        c.action do |args, options|
-#          if args.empty?
-#            c.logger.error "Please choose a title."
-#            puts c
-#          else
-#            options['title'] = args.join(" ")
-#            Post.new(Octopress.site(options), options).write
-#          end
-#        end
-#      end
-#    end
-#  end
-
 # We DO NOT use drafts since we have internal==draft and 
 # external==published websites
 #
@@ -416,90 +390,23 @@ module Octopress
   end
 
   class IndexCommand < Command
-    require 'jekyllWalker'
-    extend JekyllWalker
-
-    require 'xapianBase'
-    extend XapianBase
-
-    XAPIAN_LAST_REINDEX = "xapian/lastReIndex"
 
     def self.init_with_program(p)
       p.command(:index) do |c|
         c.syntax 'index'
         c.alias :idx
-        c.description 're-Build the Xapian indexes'
+        c.description 're-Build the Xapian indexes -- indexing done in build'
         c.option 'quite',   '-q', '--quite',   'keep quite about loading/writing'
         c.option 'verbose', '-v', '--verbose', 'report when we load/write files'
 
         c.action do | args, options |
           options['quite'] = true unless options['verbose']
           @options = options
-          #require 'xapianIndexer'
-          extend XapianIndexer
 
-          puts ""
-          system('rm -rf xapian')
-          puts "Recreating Xapian"
-          siteOpts = Jekyll.configuration(options)
-          site = Jekyll::Site.new(siteOpts)
-          setupXapian(site)
-          setupIndexer
-          recursivelyWalkDir(".", XAPIAN_LAST_REINDEX) do | someJekyllData |
-            someJekyllData[:url] =
-              someJekyllData[:file].sub(/\.md$/,'.html').sub(/^\.\//,'')
-            xapianIndexPage(someJekyllData)
-          end
-          closeDownXapian
-          FileUtils.touch(XAPIAN_LAST_REINDEX)
-          FileUtils.remove_dir('_site/xapian', true)
-          FileUtils.mkdir_p('_site')
-          FileUtils.cp_r('xapian', '_site')
-        end
-      end
-
-      p.command(:reindex) do |c|
-        c.syntax 'reindex'
-        c.description 'Removes the xapian directories'
-        c.action do | args, options |
-          begin
-            puts ""
-            system('rm -rf xapian')
-            puts "Recreating Xapian indexes"
-            setupXapian(Octopress.site)
-            closeDownXapian
-          rescue Exception
-            puts ""
-          end
+          puts "indexing done in build"
         end
       end
     end
   end # IndexCommand
-
-#  class BuildCommand < Command
-#    require 'jekyllWalker'
-#    extend JekyllWalker
-#
-#    LAST_BUILD = ".lastBuild"
-#
-#    def self.init_with_program(p)
-#      p.commands.delete(:build) if p.commands.has_key?(:build)
-#      p.commands.delete(:b)     if p.commands.has_key?(:b)
-#      p.command(:build) do |c|
-#        c.syntax 'build'
-#        c.description 'my build command'
-#        c.action do | args, options |
-#          require 'builder'
-#          extend Builder
-#
-#          recursivelyWalkDir(buildList(), LAST_BUILD) do | someJekyllData |
-#            someJekyllData[:url] =
-#              someJekyllData[:file].sub(/\.md$/,'.html').sub(/^\.\//,'')
-#            buildPage(someJekyllData)
-#          end
-#        end
-#      end
-#    end
-#  end
 
 end

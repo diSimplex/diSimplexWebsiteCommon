@@ -169,4 +169,50 @@ module Octopress
   end
 #=end
 
+  class IndexCommand < Command
+    require 'jekyllWalker'
+    extend JekyllWalker
+
+    require 'xapianBase'
+    extend XapianBase
+
+    XAPIAN_LAST_REINDEX = "xapian/lastReIndex"
+
+    def self.init_with_program(p)
+      p.commands.delete(:index) if p.commands.has_key?(:index)
+      p.commands.delete(:i)     if p.commands.has_key?(:i)
+      p.command(:index) do |c|
+        c.syntax 'index'
+        c.alias :idx
+        c.description 're-Build the Xapian indexes'
+        c.option 'quite',   '-q', '--quite',   'keep quite about loading/writing'
+        c.option 'verbose', '-v', '--verbose', 'report when we load/write files'
+
+        c.action do | args, options |
+          options['quite'] = true unless options['verbose']
+          @options = options
+          extend XapianIndexer
+
+          puts ""
+          system('rm -rf xapian')
+          puts "Recreating Xapian"
+          siteOpts = Jekyll.configuration(options)
+          site = Jekyll::Site.new(siteOpts)
+          setupXapian(site)
+          setupIndexer
+          recursivelyWalkDir(".", XAPIAN_LAST_REINDEX) do | someJekyllData |
+            someJekyllData[:url] =
+              someJekyllData[:file].sub(/\.md$/,'.html').sub(/^\.\//,'')
+            xapianIndexPage(someJekyllData)
+          end
+          closeDownXapian
+          FileUtils.touch(XAPIAN_LAST_REINDEX)
+          FileUtils.remove_dir('_site/xapian', true)
+          FileUtils.mkdir_p('_site')
+          FileUtils.cp_r('xapian', '_site')
+        end
+      end
+    end
+  end # IndexCommand
+
 end # Octopress
