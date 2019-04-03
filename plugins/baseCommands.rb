@@ -435,7 +435,7 @@ module Octopress
         c.action do | args, options |
           options['quite'] = true unless options['verbose']
           @options = options
-          require 'xapianIndexer'
+          #require 'xapianIndexer'
           extend XapianIndexer
 
           puts ""
