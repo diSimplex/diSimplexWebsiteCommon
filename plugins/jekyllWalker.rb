@@ -2,7 +2,7 @@
 
 # This is a collection of library functions which can be used to help 
 # walk over all author/citation entries, make systematic changes and 
-# the right out the results.
+# the write out the results.
 
 require 'fileutils'
 require 'yaml'

@@ -11,6 +11,31 @@ module IndexBuilder
     }
   end
 
+  def addDirIndexPages(basePath, baseTitle, page)
+    fileName  = File.basename(page[:file], '.md')
+    fileUrl   = page[:file].gsub(/\.md/, '.html')
+    pathDirs  = fileUrl.split(/\//)
+    lastPath = pathDirs.shift
+    while !pathDirs.empty? do
+      aDir = pathDirs.shift
+      curDirIndexPath = "#{lastPath}/index.md"
+      puts curDirIndexPath
+      curDirIndex = loadJekyllDataFile(curDirIndexPath)
+      curDirIndex[:metaData]['title']  = lastPath
+      curDirIndex[:metaData]['layout'] = 'index'
+      curDirIndex[:changed]            = true
+      anItem = aDir.gsub(/\.html$/, '')
+      addIndexItem(
+        curDirIndex[:metaData],
+       'index',
+       'k'+anItem,
+       lastPath+'/'+aDir,
+       anItem
+      )
+      lastPath = lastPath + '/' + aDir
+    end
+  end
+
   def addIndexPages(basePath, baseTitle, page)
     fileName       = File.basename(page[:file], '.md')
     oneLetter      = fileName[0]
@@ -117,6 +142,7 @@ module IndexBuilder
         page[:metaData]['citeKeys'] =
           sortKeys(page[:metaData]['citeKeys'])
       end
+      puts page[:file]
       renderPage(page, site)
 
       @jekyllDataFiles.delete(aKey)

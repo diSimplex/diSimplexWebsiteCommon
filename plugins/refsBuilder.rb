@@ -130,7 +130,7 @@ module Octopress
       p.commands.delete(:b)     if p.commands.has_key?(:b)
       p.command(:build) do |c|
         c.syntax 'build'
-        c.description 'my build command'
+        c.description 'references build command'
         c.option 'quite',   '-q', '--quite',   'keep quite about loading/writing'
         c.option 'verbose', '-v', '--verbose', 'report when we load/write files'
         c.action do | args, options |

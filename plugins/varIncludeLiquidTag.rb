@@ -1,5 +1,3 @@
-require 'pp'
-
 module Jekyll
   class VarIncludeLiquidTag < Liquid::Tag
 

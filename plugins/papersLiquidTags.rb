@@ -8,7 +8,7 @@ module Jekyll
     end
 
     def citation2url(citeKey)
-      '/refs/cite/'+citation2urlBase(citeKey)+'.html'
+      '/papers/cite/'+citation2urlBase(citeKey)+'.html'
     end
 
   end
@@ -25,7 +25,7 @@ module Jekyll
     end
 
     def paper2url(paperName)
-      '/refs/' + paper2urlBase(paperName)+'.html'
+      '/papers/' + paper2urlBase(paperName)+'.html'
     end
 
   end
@@ -42,7 +42,7 @@ module Jekyll
     end
 
     def author2url(authorName)
-      '/refs/' + author2urlBase(authorName)+'.html'
+      '/papers/' + author2urlBase(authorName)+'.html'
     end
 
   end
@@ -59,7 +59,7 @@ module Jekyll
     end
 
     def keyword2url(keywordName)
-      '/refs/' + keyword2urlBase(keywordName)+'.html'
+      '/papers/' + keyword2urlBase(keywordName)+'.html'
     end
 
   end

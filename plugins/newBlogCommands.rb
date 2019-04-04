@@ -27,8 +27,6 @@ module Octopress
             Readline.readline( "Title: ", true) unless
             options.has_key?('title')
           options['path'] = createFileNameFromDateTitle(options)
-          require 'pp'
-          pp options
           Post.new(Octopress.site(options), options).write unless
             File.exists?(options['path'])
           system("nano +10 _posts/#{options['path']}")

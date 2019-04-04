@@ -40,8 +40,6 @@ module Jekyll
         level_html = ''
 
         doc = Nokogiri::HTML(html)
-        #require 'pp'
-        #pp doc
 
         # Find H1 tag and all its H2 siblings until next H1
         doc.css('h1').each do |h1|

@@ -154,7 +154,6 @@ module Octopress
     end
 
     def addAuthor(options)
-      require 'pp'
       options["source"]   = '.'
       options["destination"] = '_site'
       options['template'] = 'author'
@@ -193,7 +192,6 @@ module Octopress
         options['title'] = options['cleanname']
           
         options['path'] = author2urlBase(options['cleanname'])+'.md'
-        pp options
         if !File.exists?(options['path']) then
           siteOpts = Jekyll.configuration(options)
           site = Jekyll::Site.new(siteOpts)
