@@ -168,7 +168,7 @@ module Octopress
 
       cmd << " --delete " if delete
 
-      cmd << " #{localDir}/* "
+      cmd << " #{localDir}/ "
 
       cmd << " #{options['user']}:" if options.has_key?('user')
 

@@ -93,7 +93,6 @@ module ReferenceBuilder
   end
 
   def addPaperItem(index, year, citeKey, url, title)
-    puts "addPaperItem [#{year}] [#{citeKey}] [#{url}] [#{title}]"
     indexKey = "#{year}#{citeKey}"
     linkText = "#{year} #{citeKey}"
     index[indexKey] = {
