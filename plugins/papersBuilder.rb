@@ -38,9 +38,9 @@ module ReferenceBuilder
       File.open(authorFile, 'w') do | aFile |
         aFile.puts('---')
         aFile.puts('layout: author')
-        aFile.puts("title: #{anAuthor}")
-        aFile.puts("firstName: #{firstName}")
-        aFile.puts("surName: #{surname}")
+        aFile.puts("title: \"#{anAuthor}\"")
+        aFile.puts("firstName: \"#{firstName}\"")
+        aFile.puts("surName: \"#{surname}\"")
         aFile.puts('---')
         aFile.puts('')
         aFile.puts("# #{anAuthor}")
@@ -55,7 +55,7 @@ module ReferenceBuilder
       File.open(keywordFile, 'w') do | kFile |
         kFile.puts('---')
         kFile.puts('layout: keyword')
-        kFile.puts("title: #{aKeyword}")
+        kFile.puts("title: \"#{aKeyword}\"")
         kFile.puts('---')
         kFile.puts('')
         kFile.puts("# #{aKeyword}")
@@ -70,7 +70,7 @@ module ReferenceBuilder
       File.open(paperFile, 'w') do | kFile |
         kFile.puts('---')
         kFile.puts('layout: paper')
-        kFile.puts("title: #{aTitle}")
+        kFile.puts("title: \"#{aTitle}\"")
         kFile.puts('---')
         kFile.puts('')
         kFile.puts(anAbstract)
