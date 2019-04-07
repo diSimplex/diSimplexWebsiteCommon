@@ -275,6 +275,9 @@ module Octopress
           site.data = Jekyll::DataReader.new(site).read(site.config["data_dir"])
           FileUtils.mkdir_p(site.config['destination'])
 
+          # rsync the (human) _overlay on top of the papers directory
+          system("rsync -arv _overlay/ .")
+
           # do this by hand...
           buildPage(loadJekyllDataFile("index.md"), site) unless
             FileUtils.uptodate?(LAST_BUILD, [ "index.md" ])
