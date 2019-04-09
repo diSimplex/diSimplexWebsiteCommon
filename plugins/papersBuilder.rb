@@ -189,7 +189,11 @@ module ReferenceBuilder
     #renderPage(createBibLaTeXPage(page), site)
     #renderPage(createBibConTeXtPage(page), site)
     dirPath = page[:file].gsub(/\.md$/,'')
-    FileUtils.cp_r(dirPath, '_site/'+dirPath)
+    sitePath = '_site/'+dirPath
+    puts "Removing [#{sitePath}]"
+    FileUtils.rm_rf(sitePath)
+    puts "Copying [#{dirPath}] to [#{sitePath}]"
+    FileUtils.cp_r(dirPath, sitePath)
     removeFromDataFileCache(page[:file])
   end
 
