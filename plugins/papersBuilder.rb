@@ -186,11 +186,13 @@ module ReferenceBuilder
   def buildWorkingDraft(page, site)
     puts('>>>>> buildWorkingDraft')
     puts(page[:file])
-    sanitizeAbstractMetaData(page)
     addDirIndexPages("workingDraft", "WorkingDraft", page)
-    addPaperAbstractPages(page)
-    addAuthorAbstractPages(page)
-    addKeywordAbstractPages(page)
+    if not page[:file] =~ /code/ then
+      sanitizeAbstractMetaData(page)
+      addPaperAbstractPages(page)
+      addAuthorAbstractPages(page)
+      addKeywordAbstractPages(page)
+    end
     renderPage(page, site)
     #renderPage(createBibLaTeXPage(page), site)
     #renderPage(createBibConTeXtPage(page), site)
