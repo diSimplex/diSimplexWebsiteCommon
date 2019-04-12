@@ -13,20 +13,24 @@ module ReferenceBuilder
 
   def page2liquid(page)
     fileName = File.basename(page[:file], '.md')
+    dirName  = File.dirname(page[:file])
+    codePath = page[:url].gsub(/\.html/, '')
     deep_merge_hashes(
       page[:metaData],
       {
         "content"       => page[:content],
         "path"          => page[:file],
+        "codePath"      => codePath,
         "url"           => page[:url],
-        "biblatexUrl"   => page[:url].sub(/\.html/, '.bib'),
-        "bibcontextUrl" => page[:url].sub(/\.html/, '.lua'),
-        "paperPdf"      => page[:url].sub(/\.html/, "/#{fileName}.pdf"),
-        "paperPdf2Html" => page[:url].sub(/\.html/, "/#{fileName}.html"),
-        "papersUrl"     => page[:url].sub(/\.html/, 'Papers.html')
+        "paperPdf"      => dirName+"/doc/#{fileName}.pdf",
+        "paperPdf2Html" => dirName+"/doc/#{fileName}/#{fileName}.html",
+        "papersUrl"     => codePath+'Papers.html'
       }
     )
   end
+# Old ReferenceBuilder :metaData
+#        "biblatexUrl"   => page[:url].sub(/\.html/, '.bib'),
+#        "bibcontextUrl" => page[:url].sub(/\.html/, '.lua'),
 
   def checkAuthorPage(anAuthor)
     authorFile = author2urlBase(anAuthor)+'.md'
@@ -180,6 +184,8 @@ module ReferenceBuilder
   end
 
   def buildWorkingDraft(page, site)
+    puts('>>>>> buildWorkingDraft')
+    puts(page[:file])
     sanitizeAbstractMetaData(page)
     addDirIndexPages("workingDraft", "WorkingDraft", page)
     addPaperAbstractPages(page)
@@ -188,12 +194,18 @@ module ReferenceBuilder
     renderPage(page, site)
     #renderPage(createBibLaTeXPage(page), site)
     #renderPage(createBibConTeXtPage(page), site)
-    dirPath = page[:file].gsub(/\.md$/,'')
-    sitePath = '_site/'+dirPath
-    puts "Removing [#{sitePath}]"
-    FileUtils.rm_rf(sitePath)
-    puts "Copying [#{dirPath}] to [#{sitePath}]"
-    FileUtils.cp_r(dirPath, sitePath)
+    dirPath = File.dirname(page[:file])+'/doc'
+    if File.directory?(dirPath) then
+      sitePath = '_site/'+dirPath
+      puts "Copying [#{dirPath}] to [#{sitePath}]"
+      FileUtils.cp_r(dirPath, sitePath)
+    end
+    codePath = page[:file].gsub(/\.md/, '')
+    if File.file?(codePath) then
+      sitePath = '_site/'+codePath
+      puts "Copying [#{codePath}] to [#{sitePath}]"
+      FileUtils.cp(codePath, sitePath)
+    end
     removeFromDataFileCache(page[:file])
   end
 

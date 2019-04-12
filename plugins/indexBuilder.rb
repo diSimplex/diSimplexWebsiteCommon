@@ -25,12 +25,20 @@ module IndexBuilder
       curDirIndex[:metaData]['layout'] = 'index'
       curDirIndex[:changed]            = true
       anItem = aDir.gsub(/\.html$/, '')
+      linkText = anItem
+      auxText = ""
+      if aDir =~ /\.html/ then
+        auxText = page[:metaData]['title'] if aDir =~ /\.html/
+      else
+        linkText = anItem+'/'
+      end
       addIndexItem(
         curDirIndex[:metaData],
        'index',
        'k'+anItem,
        lastPath+'/'+aDir,
-       anItem
+       linkText,
+       auxText
       )
       lastPath = lastPath + '/' + aDir
     end
