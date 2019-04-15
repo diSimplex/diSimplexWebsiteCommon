@@ -1,4 +1,5 @@
 require 'refsLiquidTags'
+require 'page'
 
 module Octopress
 
