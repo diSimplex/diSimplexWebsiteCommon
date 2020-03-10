@@ -366,21 +366,16 @@ module Octopress
   end
 
   class CleanCommand < Command
-    require 'xapianBase'
-    extend XapianBase
 
     def self.init_with_program(p)
       p.command(:clean) do |c|
         c.syntax 'clean'
-        c.description 'Removes the _site and xapian directories'
+        c.description 'Removes the _site directories'
 
         c.action do |args, options|
           begin
             puts ""
-            system('rm -rf _site xapian')
-            puts "Recreating Xapian"
-            setupXapian(Octopress.site)
-            closeDownXapian
+            system('rm -rf _site')
           rescue Exception
             puts ""
           end
