@@ -129,7 +129,7 @@ module JekyllWalker
     #
     # ensure any Yaml-nasty characters are escaped!
     #
-    aString.gsub!(/\\+([\'\w])/,'\\\\\\\\\1')
+    return aString.gsub(/\\+([\'\w])/,'\\\\\\\\\1')
     aString.gsub!(/\\*\"/,'\"')
 #    puts aString.encoding.to_s
 #    puts '['+aString+']'
@@ -160,7 +160,7 @@ module JekyllWalker
       jFile.puts aYamlKey
       return
     end
-    recodeString(aString)
+    aString = recodeString(aString)
     if aString =~ /\n/ then
       jFile.puts aYamlKey+'|'
       aString.each_line do | aLine |
@@ -244,7 +244,7 @@ module JekyllWalker
       jFile.puts "---"
       if someJekyllData.has_key?(:content) &&
          !someJekyllData[:content].nil? then
-        recodeString(someJekyllData[:content])
+        someJekyllData[:content] = recodeString(someJekyllData[:content])
         jFile.puts someJekyllData[:content]
       end
     end
