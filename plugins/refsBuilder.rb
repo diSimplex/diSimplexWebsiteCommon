@@ -78,12 +78,17 @@ module ReferenceBuilder
     renderPage(createBibLaTeXPage(page), site)
     renderPage(createBibConTeXtPage(page), site)
     removeFromDataFileCache(page[:file])
+    rescue StandardError => err
+      pp page[:file]
+      puts err
   end
 
   def buildAuthor(page, site)
     renderPage(page, site)
     addIndexPages("author", "Author", page)
     removeFromDataFileCache(page[:file])
+    rescue StandardError
+      pp page[:file]
   end
 
   def buildList

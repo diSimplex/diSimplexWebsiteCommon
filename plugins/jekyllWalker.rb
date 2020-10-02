@@ -6,7 +6,7 @@
 
 require 'fileutils'
 require 'yaml'
-require 'safe_yaml/load'
+#require 'safe_yaml/load'
 
 module JekyllWalker
 
@@ -61,9 +61,18 @@ module JekyllWalker
 #    puts content.encoding
     jekyllData[:content] = content
     if content =~ /\A(---\s*\n.*?\n?)^((---|\.\.\.)\s*$\n?)/m
-      jekyllData[:metaData] = SafeYAML.load($1)
-      jekyllData[:metaData] = Hash.new if jekyllData[:metaData].nil?
-      jekyllData[:content].sub!(/\A(---\s*\n.*?\n?)^((---|\.\.\.)\s*$\n?)/m, '')
+      begin
+        #jekyllData[:metaData] = SafeYAML.load($1)
+        jekyllData[:metaData] = YAML.load($1)
+      rescue StandardError => err
+        puts aJekyllDataFile
+        puts "---------------------------------------------------------"
+        pp $1
+        puts "---------------------------------------------------------"
+        puts err
+      end
+        jekyllData[:metaData] = Hash.new if jekyllData[:metaData].nil?
+        jekyllData[:content].sub!(/\A(---\s*\n.*?\n?)^((---|\.\.\.)\s*$\n?)/m, '')
     end
 #    reportEncoding(jekyllData)
     jekyllData
